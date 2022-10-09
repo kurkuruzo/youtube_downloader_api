@@ -1,0 +1,5 @@
+api/__pycache__/
+youtube/__pycache__/
+youtube/static/downloads/
+db.sqlite3
+youtube/config.py

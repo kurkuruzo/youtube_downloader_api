@@ -1,0 +1,19 @@
+{% extends 'youtube/index.html' %}
+{% load static %}
+
+{% block video_details %}
+<div style="width: 40%; margin: auto">
+      <div class="card mb-3">
+        {% if object.thumbnail %}
+        <img src="{{ object.thumbnail }}" class="card-img" alt="{{ object.name }}">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ object.name }}</h5>
+            <p class="card-text">{{ object.description | slice:"200" }}</p>
+            <a href="{{ object.url }}" class="btn btn-primary">Посмотреть на YouTube</a>
+            <a href="{% static 'downloads/'%}{{object.path}}" class="btn btn-primary">Скачать</a>
+            <p class="card-text"><small>Добавлено {{ object.date_added }}</small></p>
+        </div>
+      </div>
+</div>
+{% endblock video_details %}

@@ -1,0 +1,33 @@
+{% extends 'youtube/index.html' %}
+
+{% block home %}
+<div class="container-md text-center mt-5">
+    <p>Добро пожаловать!</p>
+    <p>
+        <a class="btn btn-primary" href="{% url 'videos' %}">Посмотреть загруженные видео</a>
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#downloadModal" href="#">Загрузить видео</a>
+    </p>
+  </div>
+
+  <div class="modal fade" id="downloadModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Добавить видео</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{% url 'videos' %}" method="post">
+            <div class="modal-body">
+                <p>Введите URL видео</p>
+                <input class="form-control" type="text" name="download" placeholder="https://youtube.com" aria-label="default input">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" name="download">Загрузить</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+{% endblock home %}
+

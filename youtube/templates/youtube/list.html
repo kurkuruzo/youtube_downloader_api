@@ -1,0 +1,23 @@
+{% extends 'youtube/index.html' %}
+
+{% block videos_list %}
+<div class="card-group">
+    {% for video in object_list %}
+    <div class="card">
+      
+        {% if video.thumbnail %}
+        <img src="{{video.thumbnail}}" class="card-img-top" alt="{{video.name}}">
+        {% endif %} 
+        
+      <div class="card-body">
+        <h5 class="card-title">{{video.name}}</h5>
+        <p class="card-text">{{video.description | slice:"200"}}...</p>
+        <a href="{% url 'video-details' video.id %}" class="btn btn-primary">Детали</a>
+      </div>
+      <div class="card-footer">
+        <small class="text-muted">Добавлено {{video.date_added}}</small>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endblock videos_list %}
