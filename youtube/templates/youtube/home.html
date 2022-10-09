@@ -16,7 +16,8 @@
             <h5 class="modal-title">Добавить видео</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="{% url 'videos' %}" method="post">
+          <form action="{% url 'add-video' %}" method="post" name="download">
+            {% csrf_token %}
             <div class="modal-body">
                 <p>Введите URL видео</p>
                 <input class="form-control" type="text" name="download" placeholder="https://youtube.com" aria-label="default input">
