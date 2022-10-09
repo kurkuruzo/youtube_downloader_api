@@ -2,18 +2,30 @@
 {% load static %}
 
 {% block video_details %}
-<div style="width: 40%; margin: auto">
+<div style="max-width: 100%; width: 560px; margin: auto">
       <div class="card mb-3">
         {% if object.thumbnail %}
         <img src="{{ object.thumbnail }}" class="card-img" alt="{{ object.name }}">
         {% endif %}
         <div class="card-body">
             <h5 class="card-title">{{ object.name }}</h5>
-            <p class="card-text">{{ object.description | slice:"200" }}</p>
-            <a href="{{ object.url }}" class="btn btn-primary">Посмотреть на YouTube</a>
-            <a href="{% static 'downloads/'%}{{object.path}}" class="btn btn-primary">Скачать</a>
+            {% comment %} <p class="card-text">{{ object.description | slice:"200" }}</p> {% endcomment %}
+            <p class="card-text">
+              <a tabindex="0" class="btn btn-outline-secondary" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Dismissible popover" data-bs-placement="right" data-bs-content="{{ object.description }}">
+                Описание
+              </a>
+          </p>
+            <a href="{{ object.url }}" class="btn btn-outline-danger">Посмотреть на YouTube</a>
+            <a href="{% static 'downloads/'%}{{object.path}}" class="btn btn-danger">Скачать</a>
             <p class="card-text"><small>Добавлено {{ object.date_added }}</small></p>
         </div>
       </div>
 </div>
 {% endblock video_details %}
+
+{% block scripts %}
+<script>
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+</script>
+{% endblock scripts %}

@@ -6,7 +6,7 @@ from pathlib import Path
 class YouTubeVideo(models.Model):
     name = models.CharField(max_length=500)
     description = models.TextField(max_length=3500, null=True, blank=True)
-    url = models.CharField(max_length=1500)
+    url = models.CharField(max_length=1500, unique=True)
     path = models.CharField(max_length=1500, null=True, blank=True)
     length = models.IntegerField(null=True, blank=True)
     date_added = models.DateTimeField()
@@ -24,6 +24,7 @@ class YouTubeVideo(models.Model):
     @property
     def is_downloaded(self):
         return Path(self.path).is_file()
+
     
     def __str__(self):
         return f"<Video: {self.name}>"
