@@ -1,7 +1,11 @@
+import logging
 import uuid
 from django.db import models
+from django.templatetags.static import static
+from youtube.config import DOWNLOAD_PATH
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
 # Create your models here.
 class YouTubeVideo(models.Model):
     name = models.CharField(max_length=500)
@@ -24,7 +28,23 @@ class YouTubeVideo(models.Model):
     @property
     def is_downloaded(self):
         return Path(self.path).is_file()
+    
+    @property
+    def abs_path(self):
+        static_file_path = str((Path(DOWNLOAD_PATH) / self.path).resolve())
+        logger.info(f"{static_file_path=}")
+        return static_file_path
+    
+    @property
+    def download_url(self):
+        return static(f"downloads/{self.path}")
 
     
     def __str__(self):
         return f"<Video: {self.name}>"
+    
+    @classmethod
+    def get_by_id(cls, id: str):
+        logger.info(f"{id=}")
+        logger.info(f"{cls=}")
+        return cls.objects.get(pk=id)

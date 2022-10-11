@@ -123,3 +123,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery
+CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost:5672//'
+CELERY_RESULT_BACKEND = 'rpc://guest:guest@localhost:5672//'
+# CELERY_RESULT_BACKEND = 'rpc://'
+# Celery Configuration Options
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CORS_ALLOW_ALL_ORIGINS = True
