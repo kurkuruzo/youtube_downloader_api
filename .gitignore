@@ -3,3 +3,4 @@ youtube/__pycache__/
 youtube/static/downloads/
 db.sqlite3
 youtube/config.py
+youtube/migrations/__pycache__/

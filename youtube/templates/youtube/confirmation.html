@@ -1,0 +1,42 @@
+{% extends 'youtube/index.html' %}
+
+{% block content %}
+<div class="container-md text-center mt-5">
+  {{ video.is_downloaded }}
+  {% url 'video-details' pk=video.id as detail_url %}
+  {% if video.is_downloaded %}
+  <p>Видео <span id="video-title">"{{ video.name }}"</span> скачалось. <a href="{{detail_url}}">Смотрите здесь </a> </p>
+  <p><a href="{{detail_url}}"><img src="{{ video.thumbnail }}"></img></a></p>
+    {%else%}
+    <p>Видео <span id="video-title">"{{ video.name }}"</span> добавлено в очередь на скачивание</p>
+    <img class="mt-3 mb-3" style="max-width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube">
+      <p>Вы можете скачать видео с YouTube с помощью кнопок ниже</p>
+      <p>
+        {% endif %}
+        <a class="btn btn-danger mb-2" href="{% url 'videos' %}">Посмотреть загруженные видео</a>
+        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#downloadModal" href="#">Загрузить видео</a>
+      </p>
+    </div>
+
+
+    <script>
+      let task_id = "{{ download_task_id }}"
+      function checkTaskStatus(task_id) {
+        fetch('/video/status/?task_id=' + task_id)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data)
+            // if (data.uuid) {
+            //   let title_field = document.getElementById('video-title')
+            //   title_field.innerText = data.uuid
+            // } else {
+            //   setTimeout(checkTaskStatus, 1000, task_id)
+            // }
+          });
+  }
+
+      checkTaskStatus(task_id)
+    </script>
+
+{% endblock content %}
+

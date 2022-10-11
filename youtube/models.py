@@ -27,7 +27,9 @@ class YouTubeVideo(models.Model):
         
     @property
     def is_downloaded(self):
-        return Path(self.path).is_file()
+        file_exists = (Path(DOWNLOAD_PATH) / self.path).resolve().is_file()
+        logger.info(f"Video is downloaded = {file_exists}")
+        return file_exists
     
     @property
     def abs_path(self):
@@ -46,5 +48,9 @@ class YouTubeVideo(models.Model):
     @classmethod
     def get_by_id(cls, id: str):
         logger.info(f"{id=}")
-        logger.info(f"{cls=}")
         return cls.objects.get(pk=id)
+
+    @classmethod
+    def get_by_url(cls, url: str):
+        logger.info(f"{url=}")
+        return cls.objects.filter(url=url)

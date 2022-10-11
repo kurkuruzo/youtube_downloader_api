@@ -37,6 +37,8 @@
             </div>
         </nav>
         <!-- Page content-->
+        {% block content %}{% endblock content %}
+
         {% block home %}{% endblock home %}
         {% block video_details %}{% endblock video_details %}
         {% block videos_list %}{% endblock videos_list %}
@@ -48,7 +50,7 @@
                   <h5 class="modal-title">Добавить видео</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{% url 'add-video' %}" method="post">
+                <form action="{% url 'add-video-form' %}" method="post">
                   {% csrf_token %}
                   <div class="modal-body">
                       <p>Введите URL видео</p>

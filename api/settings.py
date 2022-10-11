@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0m%1cy#stk6y6_@*&i&fv9vu473hgaae8je6)3%ha^$5@*qmp&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.10.11.191', "127.0.0.1"]
+ALLOWED_HOSTS = ['10.10.11.191', "127.0.0.1", "172.24.13.199"]
 
 
 # Application definition
@@ -133,3 +133,4 @@ CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CORS_ALLOW_ALL_ORIGINS = True
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
