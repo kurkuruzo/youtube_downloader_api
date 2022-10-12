@@ -44,9 +44,7 @@ class AddVideoForm(View):
         logger.info(f"{url=}")
         video_id, download_task_id = services.add_video(url)
         return redirect(f"{resolve_url('confirmation')}?download_task_id={download_task_id}&video_id={video_id}")
-    
-
-    
+      
 
 class AddVideo(APIView):
     def post(self, request, format=None):
@@ -62,22 +60,15 @@ class CheckDownloadStatus(APIView):
         logger.info(f"{task_id=}")
         if task_id:
             res = AsyncResult(task_id)
-            logger.info({'status': res.state, 'uuid': res.result})
+            logger.info(f"{res.__dict__=}")
+            logger.info({'status': res.state})
             if res.state == "FAILURE":
                 return HttpResponseNotFound(res)
-            return Response({'status': res.state, 'uuid': res.result})
+            if res.state == "SUCCESS":
+                return Response({'status': res.state, 'id': res.id})
+            return Response({'status': res.state})
         return HttpResponseNotFound()
     
-# class GetVideo(generics.RetrieveAPIView):
-#     def get(self, request, pk, format=None):
-#         logger.info(f"{pk=}")
-#         if not pk:
-#             return HttpResponseNotFound()
-#         try:
-#             video = YouTubeVideo.get_by_id(id=pk)
-#         except ValidationError as e:
-#             return (HttpResponseNotFound(e))
-#         return Response(serialize_video(video).data)
 
 class GetVideo(generics.RetrieveAPIView):
     queryset = YouTubeVideo.objects.all()

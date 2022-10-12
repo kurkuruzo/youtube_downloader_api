@@ -21,12 +21,14 @@ def add_video(url: str):
     yt_video = create_video_obj(url=url, downloader=yt_downloader)
     logger.info(f"Created video {yt_video}")
     yt_video.path = yt_downloader.streams.get_highest_resolution().default_filename
-    yt_video.save()
+    # yt_video.save()
     
     logger.info(f"{yt_video.id=}")
     logger.info(f"{yt_video.name=}")
     logger.info(f"{yt_video.path=}")
     stream = yt_downloader.streams.get_highest_resolution()
+    yt_video.filesize = stream.filesize
+    yt_video.save()
     download_task = download_video.delay(stream)
     logger.info(f"{download_task=}")
     download_task_id = download_task.id

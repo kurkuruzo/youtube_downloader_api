@@ -1,6 +1,6 @@
 api/__pycache__/
 youtube/__pycache__/
 youtube/static/downloads/
+youtube/migrations/__pycache__/
 db.sqlite3
 youtube/config.py
-youtube/migrations/__pycache__/

@@ -11,13 +11,19 @@
             <h5 class="card-title">{{ object.name }}</h5>
             {% comment %} <p class="card-text">{{ object.description | slice:"200" }}</p> {% endcomment %}
             <p class="card-text">
+            </p>
+            <div class="d-flex justify-content-around">
               <a tabindex="0" class="btn btn-outline-secondary" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Dismissible popover" data-bs-placement="right" data-bs-content="{{ object.description }}">
                 Описание
               </a>
-          </p>
-            <a href="{{ object.url }}" class="btn btn-outline-danger">Посмотреть на YouTube</a>
-            <a href="{% static 'downloads/'%}{{object.path}}" class="btn btn-danger">Скачать</a>
-            <p class="card-text"><small>Добавлено {{ object.date_added }}</small></p>
+              <a href="{{ object.url }}" class="btn btn-outline-danger">Посмотреть на YouTube</a>
+              {% if object.filesize_OK %}
+              <a href="{% static 'downloads/'%}{{object.path}}" class="btn btn-danger">Посмотреть или скачать</a>
+              {% else %}
+              <p style="display: inline-block;">Видео закачивается. Вы можете начать смотреть его по <a href="{% static 'downloads/'%}{{object.path}}">ссылке</a>
+              {% endif %}
+            </div>
+            <p class="card-text mt-3"><small>Добавлено {{ object.date_added }}</small></p>
         </div>
       </div>
 </div>

@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 from django.db import models
 from django.templatetags.static import static
@@ -13,6 +14,7 @@ class YouTubeVideo(models.Model):
     url = models.CharField(max_length=1500, unique=True)
     path = models.CharField(max_length=1500, null=True, blank=True)
     length = models.IntegerField(null=True, blank=True)
+    filesize = models.IntegerField(null=True, blank=True)
     date_added = models.DateTimeField()
     # thumbnail = models.ImageField(null=True, blank=True)
     thumbnail = models.URLField(null=True, blank=True)
@@ -26,10 +28,16 @@ class YouTubeVideo(models.Model):
         verbose_name_plural = "Видео с YouTube"
         
     @property
-    def is_downloaded(self):
-        file_exists = (Path(DOWNLOAD_PATH) / self.path).resolve().is_file()
+    def local_file_exists(self):
+        file_path = (Path(DOWNLOAD_PATH) / self.path).resolve()
+        file_exists = file_path.is_file()
         logger.info(f"Video is downloaded = {file_exists}")
         return file_exists
+    
+    @property
+    def filesize_OK(self):
+        file_path = (Path(DOWNLOAD_PATH) / self.path).resolve()
+        return os.stat(file_path).st_size == self.filesize
     
     @property
     def abs_path(self):
