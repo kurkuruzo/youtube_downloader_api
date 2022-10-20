@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,10 +81,20 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'pgsqlpass',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -125,8 +139,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery
-CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost:5672//'
-CELERY_RESULT_BACKEND = 'rpc://guest:guest@localhost:5672//'
+RABBITMQ_USER = os.environ.get("RABBITMQ_USER")
+RABBITMQ_PASS = os.environ.get("RABBITMQ_PASS")
+CELERY_BROKER_URL = f'pyamqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbit:5672//'
+CELERY_RESULT_BACKEND = f'rpc://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbit:5672//'
 # CELERY_RESULT_BACKEND = 'rpc://'
 # Celery Configuration Options
 CELERY_TIMEZONE = "Europe/Moscow"
