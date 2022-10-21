@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: 'python manage.py runserver 0.0.0.0:8000'
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+      - .static/downloads:/app/static/downloads
+    depends_on:
+      - db
+      - rabbit
+      - celery
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: 'celery -A api worker -l INFO'
+    user: '1001'
+    volumes: 
+      - .:/app
+      - .static/downloads:/app/static/downloads
+    depends_on:
+      - rabbit
+
+  rabbit:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbitMQpass
+    ports:
+      - 5673:5672
+      - 15673:15672
+
+  db:
+    image: postgres
+    restart: always
+    logging:
+      driver: none
+    environment:
+      POSTGRES_PASSWORD: pgsqlpass
+    volumes:
+      - .dbdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    logging:
+      driver: none
+    ports:
+      - 8080:8080

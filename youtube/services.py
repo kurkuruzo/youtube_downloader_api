@@ -1,38 +1,47 @@
+import json
 import logging
 import pytube
 from typing import Optional
 from django.utils import timezone
-import youtube.config as config
 from .models import YouTubeVideo
-from .serializers import YouTubeVideoSerializer
+from .producer import send_download_confirmation
 from .tasks import download_video
 
-
+class YouTubeError(Exception):
+    pass
 logger = logging.getLogger(__name__)
 
-def add_video(url: str):
+def add_video(url: str, chat_id: int = None, message_id: int = None):
     logger.info(f"STARTING ASYNC TASK FOR VIDEO {url}")
     video_in_db = _video_in_db(url)
     logger.info(f"{video_in_db=}")
     if video_in_db:
-        return (video_in_db.id, None)
-    
+        if chat_id:
+            send_download_confirmation(json.dumps({'yt_video_id': str(video_in_db.id), "chat_id": chat_id, "message_id": message_id}))
+        return (video_in_db.id, "")
+    logger.info("Getting downloader")
     yt_downloader = get_downloader(url=url)
+    logger.info("Got downloader")
+    logger.info("Creating video object")
     yt_video = create_video_obj(url=url, downloader=yt_downloader)
-    logger.info(f"Created video {yt_video}")
-    yt_video.path = yt_downloader.streams.get_highest_resolution().default_filename
-    # yt_video.save()
-    
-    logger.info(f"{yt_video.id=}")
-    logger.info(f"{yt_video.name=}")
-    logger.info(f"{yt_video.path=}")
-    stream = yt_downloader.streams.get_highest_resolution()
-    yt_video.filesize = stream.filesize
-    yt_video.save()
-    download_task = download_video.delay(stream)
-    logger.info(f"{download_task=}")
-    download_task_id = download_task.id
-    return (yt_video.id, download_task_id)
+    logger.info(f"Created video object {yt_video}")
+    logger.info("Sending request to YouTube for stream...")
+    try:
+        logger.info(f"{yt_downloader.streams.all()}")
+        stream = yt_downloader.streams.get_highest_resolution()
+    except Exception as e:
+        logger.exception(e)
+        raise YouTubeError(e)
+    else:
+        if stream:
+            logger.info(f"Received stream {stream.itag} / {stream.resolution}")
+            yt_video.path = stream.default_filename
+            yt_video.filesize = stream.filesize
+            yt_video.save()
+            download_task = download_video.delay(stream, yt_video, chat_id, message_id)
+            logger.info(f"{download_task=}")
+            return (yt_video.id, download_task.id)
+        raise YouTubeError("Stream not found!")
 
 def create_video_obj(url: str, downloader: pytube.YouTube) -> YouTubeVideo:
     video_obj = YouTubeVideo(name=downloader.title, description=downloader.description, url=url, length=downloader.length, date_added=timezone.now(), thumbnail=downloader.thumbnail_url)
@@ -47,15 +56,11 @@ def get_downloader(url: str) -> pytube.YouTube:
     logger.info(yt_downloader)
     return yt_downloader
 
-def _download_completed(stream: pytube.Stream, file_path: str) -> str:
+def _download_completed(stream: pytube.Stream, file_path: str) -> None:
     logger.info(f"{stream.title} download finished")
-    return file_path
+    # return file_path
 
-def _download_progress(stream: pytube.Stream, chunk, bytes_remaining):
+def _download_progress(stream: pytube.Stream, chunk, bytes_remaining) -> None:
     logger.info(
         f"{stream.title} progress: {round((1 - (bytes_remaining / stream.filesize)) * 100, 0)}%"
     )
- 
-    
-def serialize_video(video: YouTubeVideo):
-    return YouTubeVideoSerializer(video, many=False)

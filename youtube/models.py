@@ -51,7 +51,7 @@ class YouTubeVideo(models.Model):
 
     
     def __str__(self):
-        return f"<Video: {self.name}>"
+        return f"<Video: {self.name}, {str(self.id)}>"
     
     @classmethod
     def get_by_id(cls, id: str):
