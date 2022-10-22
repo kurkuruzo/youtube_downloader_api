@@ -6,4 +6,3 @@ db.sqlite3
 youtube/config.py
 youtube/migrations/
 youtube/mig_bak/
-youtube/migrations/
