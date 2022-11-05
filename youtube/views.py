@@ -1,18 +1,15 @@
 from celery.result import AsyncResult
 from django.shortcuts import render, redirect, resolve_url
-from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.views import generic, View
-from django.http import HttpResponseNotFound
 import logging
 from rest_framework.views import APIView
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from youtube import serializers
 from .models import YouTubeVideo
 import youtube.services as services
-import youtube.producer as producer
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +53,7 @@ class AddVideoForm(View):
 
 
 class AddVideo(APIView):
-    def post(self, request, format=None):
+    def post(self, request, format=None) -> Response:
         logger.info(request.data)
         url = request.data.get("url")
         chat_id = request.data.get("chat_id")
@@ -75,11 +72,11 @@ class CheckDownloadStatus(APIView):
             logger.info(f"{res.__dict__=}")
             logger.info({"status": res.state})
             if res.state == "FAILURE":
-                return HttpResponseNotFound(res)
+                raise NotFound(res)
             if res.state == "SUCCESS":
                 return Response({"status": res.state, "id": res.id})
             return Response({"status": res.state})
-        return HttpResponseNotFound()
+        raise NotFound(res)
 
 
 class GetVideo(generics.RetrieveAPIView):

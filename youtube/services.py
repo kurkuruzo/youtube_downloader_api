@@ -18,14 +18,14 @@ def add_video(url: str, chat_id: int = None, message_id: int = None):
     logger.info(f"STARTING ASYNC TASK FOR VIDEO {url}")
     video_in_db = _video_in_db(url)
     logger.info(f"{video_in_db=}")
-    yt_downloader = get_downloader(url=url)
+    yt_downloader = _get_downloader(url=url)
     if video_in_db:
         if not video_in_db.filesize_OK:
             video = video_in_db
         else:
             return (video_in_db.id, "")
     else:
-        video = create_video_obj(url=url, downloader=yt_downloader)
+        video = _create_video_obj(url=url, downloader=yt_downloader)
     return _download_video(url=url, downloader=yt_downloader, video=video, chat_id=chat_id, message_id=message_id)
 
 def _download_video(url: str, downloader: pytube.YouTube, video: YouTubeVideo, chat_id: int, message_id: int):
@@ -43,7 +43,7 @@ def _download_video(url: str, downloader: pytube.YouTube, video: YouTubeVideo, c
         logger.info(f"{download_task=}")
         return (video.id, download_task.id)
 
-def create_video_obj(url: str, downloader: pytube.YouTube) -> YouTubeVideo:
+def _create_video_obj(url: str, downloader: pytube.YouTube) -> YouTubeVideo:
     video_obj = YouTubeVideo(
         name=downloader.title,
         description=downloader.description,
@@ -63,7 +63,7 @@ def _video_in_db(url: str) -> Optional[YouTubeVideo]:
     return YouTubeVideo.objects.filter(url=url).first()
 
 
-def get_downloader(url: str) -> pytube.YouTube:
+def _get_downloader(url: str) -> pytube.YouTube:
     yt_downloader = pytube.YouTube(
         url,
         on_complete_callback=_download_completed,
@@ -73,9 +73,8 @@ def get_downloader(url: str) -> pytube.YouTube:
     return yt_downloader
 
 
-def _download_completed(stream: pytube.Stream, file_path: str) -> None:
+def _download_completed(stream: pytube.Stream, file_path: str = None) -> None:
     logger.info(f"{stream.title} download finished")
-    # return file_path
 
 
 def _download_progress(stream: pytube.Stream, chunk, bytes_remaining) -> None:

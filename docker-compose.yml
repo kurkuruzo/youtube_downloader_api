@@ -5,12 +5,13 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    user: '1001'
     command: 'python manage.py runserver 0.0.0.0:8000'
     ports:
       - 8000:8000
     volumes:
       - .:/app
-      - .static/downloads:/app/static/downloads
+      - ./youtube/static/downloads:/app/static/downloads
     depends_on:
       - db
       - rabbit
@@ -23,9 +24,9 @@ services:
     restart: always
     command: 'celery -A api worker -l INFO'
     user: '1001'
-    volumes: 
+    volumes:
       - .:/app
-      - .static/downloads:/app/static/downloads
+      - ./youtube/static/downloads:/app/static/downloads
     depends_on:
       - rabbit
 
