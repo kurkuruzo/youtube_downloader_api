@@ -1,8 +1,9 @@
 api/__pycache__/
 youtube/__pycache__/
 youtube/static/downloads/
-youtube/migrations/__pycache__/
+youtube/migrations/
 db.sqlite3
 youtube/config.py
 youtube/migrations/
 youtube/mig_bak/
+.env
