@@ -29,8 +29,8 @@ SECRET_KEY = "django-insecure-0m%1cy#stk6y6_@*&i&fv9vu473hgaae8je6)3%ha^$5@*qmp&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["10.10.11.191", "127.0.0.1", "172.24.13.199", "backend"]
-
+ALLOWED_HOSTS = ["localhost", "10.10.11.191", "127.0.0.1", "172.24.13.199", "backend", ".ngrok.io"]
+CSRF_TRUSTED_ORIGINS = ["https://9ea8-5-166-209-224.eu.ngrok.io", "http://10.10.11.191"]
 
 # Application definition
 
@@ -74,7 +74,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "api.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
