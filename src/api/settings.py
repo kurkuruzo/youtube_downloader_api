@@ -29,8 +29,8 @@ SECRET_KEY = "django-insecure-0m%1cy#stk6y6_@*&i&fv9vu473hgaae8je6)3%ha^$5@*qmp&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "10.10.11.191", "127.0.0.1", "172.24.13.199", "backend", ".ngrok.io"]
-CSRF_TRUSTED_ORIGINS = ["https://9ea8-5-166-209-224.eu.ngrok.io", "http://10.10.11.191"]
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(" ")
+CSRF_TRUSTED_ORIGINS = os.environ["CSRF_TRUSTED_ORIGINS"].split(" ")
 
 # Application definition
 
@@ -81,19 +81,13 @@ WSGI_APPLICATION = "api.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "pgsqlpass",
-        "HOST": "db",
-        "PORT": "5432",
+        "NAME": os.environ["PG_DB_NAME"],
+        "USER": os.environ["PG_USER_NAME"],
+        "PASSWORD": os.environ["PG_PASSWORD"],
+        "HOST": os.environ["PG_HOST"],
+        "PORT": os.environ["PG_PORT"],
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 # Password validation
@@ -140,6 +134,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Celery
 RABBITMQ_USER = os.environ.get("RABBITMQ_USER")
 RABBITMQ_PASS = os.environ.get("RABBITMQ_PASS")
+print(RABBITMQ_PASS)
 CELERY_BROKER_URL = f"pyamqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbit:5672//"
 CELERY_RESULT_BACKEND = f"rpc://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbit:5672//"
 # CELERY_RESULT_BACKEND = 'rpc://'
@@ -149,3 +144,6 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CORS_ALLOW_ALL_ORIGINS = True
 CELERY_ACCEPT_CONTENT = ["json", "pickle"]
+
+# Download path
+DOWNLOAD_PATH = os.environ.get("DOWNLOAD_PATH") or "youtube/static/downloads/"

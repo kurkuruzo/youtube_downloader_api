@@ -5,13 +5,15 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    user: '1001'
+    user: '1000'
+    env_file:
+      - .env
     command: 'python manage.py runserver 0.0.0.0:8000'
     ports:
       - 8000:8000
     volumes:
-      - .:/app
-      - ./youtube/static/downloads:/app/static/downloads
+      - ./src:/app
+      - ./static/downloads:/app/static/downloads
     depends_on:
       - db
       - rabbit
@@ -22,11 +24,13 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - .env
     command: 'celery -A api worker -l INFO'
-    user: '1001'
+    user: '1000'
     volumes:
-      - .:/app
-      - ./youtube/static/downloads:/app/static/downloads
+      - ./src:/app
+      - ./static/downloads:/app/static/downloads
     depends_on:
       - rabbit
 
@@ -34,15 +38,16 @@ services:
     image: rabbitmq:3-management
     restart: always
     environment:
-      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_USER: rabbitMQ
       RABBITMQ_DEFAULT_PASS: rabbitMQpass
     ports:
-      - 5673:5672
-      - 15673:15672
+      - 5672:5672
+      - 15672:15672
 
   db:
     image: postgres
     restart: always
+    hostname: yt_downloader_db
     logging:
       driver: none
     environment:
@@ -50,15 +55,16 @@ services:
     volumes:
       - .dbdata:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 5437:5437
+    command: -p 5437
 
-  adminer:
-    image: adminer
-    restart: always
-    logging:
-      driver: none
-    ports:
-      - 8080:8080
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   logging:
+  #     driver: none
+  #   ports:
+  #     - 8080:8080
 
   telegram-bot-api:
     image: aiogram/telegram-bot-api:latest
@@ -66,7 +72,6 @@ services:
       TELEGRAM_API_ID: "${API_ID}"
       TELEGRAM_API_HASH: "${API_HASH}"
     volumes:
-      - ../../telegram-bot-api-data:/var/lib/telegram-bot-api
+      - ../telegram-bot-api-data:/var/lib/telegram-bot-api
     ports:
       - "8081:8081"
-

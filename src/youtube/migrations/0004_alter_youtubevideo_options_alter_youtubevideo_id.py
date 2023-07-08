@@ -15,9 +15,4 @@ class Migration(migrations.Migration):
             name='youtubevideo',
             options={'ordering': ('-date_added',), 'verbose_name': 'Видео с YouTube', 'verbose_name_plural': 'Видео с YouTube'},
         ),
-        migrations.AlterField(
-            model_name='youtubevideo',
-            name='id',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True),
-        ),
     ]

@@ -3,8 +3,10 @@ import os
 import uuid
 from django.db import models
 from django.templatetags.static import static
-from youtube.config import DOWNLOAD_PATH
 from pathlib import Path
+
+from api.settings import DOWNLOAD_PATH
+
 
 logger = logging.getLogger(__name__)
 # Create your models here.

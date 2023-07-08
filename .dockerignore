@@ -1,0 +1,5 @@
+.dbdata
+Dockerfile
+.env
+.gitignore
+docker-compose.yml

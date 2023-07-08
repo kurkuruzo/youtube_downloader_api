@@ -1,5 +1,6 @@
 import json
 import logging
+from turtle import title
 import pytube
 from typing import Optional
 from django.utils import timezone
@@ -14,7 +15,7 @@ class YouTubeError(Exception):
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.FileHandler('django_services.log', mode='a'))
 
-def add_video(url: str, chat_id: int = None, message_id: int = None):
+def add_video(url: str, chat_id: Optional[int] = None, message_id: Optional[int] = None):
     logger.info(f"STARTING ASYNC TASK FOR VIDEO {url}")
     video_in_db = _video_in_db(url)
     logger.info(f"{video_in_db=}")
@@ -44,8 +45,13 @@ def _download_video(url: str, downloader: pytube.YouTube, video: YouTubeVideo, c
         return (video.id, download_task.id)
 
 def _create_video_obj(url: str, downloader: pytube.YouTube) -> YouTubeVideo:
+    try:
+        video_title = downloader.title
+    except Exception as e:
+        logger.exception(e)
+        video_title = "Не удалось получить название видео"
     video_obj = YouTubeVideo(
-        name=downloader.title,
+        name=video_title,
         description=downloader.description,
         url=url,
         length=downloader.length,

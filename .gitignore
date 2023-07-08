@@ -1,9 +1,7 @@
-api/__pycache__/
-youtube/__pycache__/
-youtube/static/downloads/
-youtube/migrations/
-db.sqlite3
-youtube/config.py
-youtube/migrations/
-youtube/mig_bak/
+src/api/__pycache__/
+src/youtube/__pycache__/
+src/youtube/static/downloads/
+src/youtube/migrations/__pycache__/
 .env
+
+src/django_services.log

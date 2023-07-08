@@ -46,7 +46,11 @@ class AddVideoForm(View):
     def post(self, request, *args, **kwargs):
         url = request.POST.get("url")
         logger.info(f"{url=}")
-        video_id, download_task_id = services.add_video(url)
+        try:
+            video_id, download_task_id = services.add_video(url)
+        except services.YouTubeError as e:
+            logger.exception(e)
+            return render(request=request, template_name="youtube/error.html", context={"error": e})
         return redirect(
             f"{resolve_url('confirmation')}?download_task_id={download_task_id}&video_id={video_id}"
         )
@@ -59,7 +63,11 @@ class AddVideo(APIView):
         chat_id = request.data.get("chat_id")
         message_id = request.data.get("message_id")
         logger.info(f"{url=}")
-        video_id, download_task_id = services.add_video(url, chat_id, message_id)
+        try:
+            video_id, download_task_id = services.add_video(url, chat_id, message_id)
+        except services.YouTubeError as e:
+            logger.exception(e)
+            return Response({"error": e})
         return Response({"video_id": video_id, "download_task_id": download_task_id})
 
 
