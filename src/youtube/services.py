@@ -1,7 +1,5 @@
-import json
 import logging
-from turtle import title
-import pytube
+# import pytube
 from typing import Optional
 from django.utils import timezone
 from yt_dlp import YoutubeDL
@@ -77,11 +75,11 @@ def _video_in_db(url: str) -> Optional[YouTubeVideo]:
 
 
 
-def _download_completed(stream: pytube.Stream, file_path: str = None) -> None:
-    logger.info(f"{stream.title} download finished")
+# def _download_completed(stream: pytube.Stream, file_path: str = None) -> None:
+#     logger.info(f"{stream.title} download finished")
 
 
-def _download_progress(stream: pytube.Stream, chunk, bytes_remaining) -> None:
-    logger.info(
-        f"{stream.title} progress: {round((1 - (bytes_remaining / stream.filesize)) * 100, 0)}%"
-    )
+# def _download_progress(stream: pytube.Stream, chunk, bytes_remaining) -> None:
+#     logger.info(
+#         f"{stream.title} progress: {round((1 - (bytes_remaining / stream.filesize)) * 100, 0)}%"
+#     )

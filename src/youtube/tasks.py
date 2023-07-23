@@ -1,7 +1,7 @@
 from celery import shared_task
 import json
 import logging
-import pytube
+# import pytube
 import yt_dlp
 
 from .models import YouTubeVideo
