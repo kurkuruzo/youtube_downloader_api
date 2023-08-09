@@ -1,4 +1,6 @@
+from ast import Return
 from celery.result import AsyncResult
+from django.utils import timezone
 from django.shortcuts import render, redirect, resolve_url
 from django.views import generic, View
 import logging
@@ -8,7 +10,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from youtube import serializers
-from .models import YouTubeVideo
+from .models import DownloadRequest, TelegramDownloadRequest, YouTubeVideo
+from .tasks import download_video
+
 import youtube.services as services
 
 logger = logging.getLogger(__name__)
@@ -55,7 +59,7 @@ class AddVideoForm(View):
             f"{resolve_url('confirmation')}?download_task_id={download_task_id}&video_id={video_id}"
         )
 
-
+# API Views
 class AddVideo(APIView):
     def post(self, request, format=None) -> Response:
         logger.info(request.data)
@@ -63,12 +67,29 @@ class AddVideo(APIView):
         chat_id = request.data.get("chat_id")
         message_id = request.data.get("message_id")
         logger.info(f"{url=}")
+        
+        if not url:
+            return Response({"error": "No url provided"})
+        
+        # request = TelegramDownloadRequest(url=url, date_added=timezone.now(), chat_id=chat_id, message_id=message_id) if chat_id and message_id else DownloadRequest(url=url, date_added=timezone.now())
+        if chat_id and message_id:
+            request, _ = TelegramDownloadRequest.objects.get_or_create(url=url, date_added=timezone.now(), chat_id=chat_id, message_id=message_id)
+        else:
+            request, _ = DownloadRequest.objects.get_or_create(url=url, date_added=timezone.now())
         try:
-            video_id, download_task_id = services.add_video(url, chat_id, message_id)
+            request.video = services.add_video(url)
         except services.YouTubeError as e:
             logger.exception(e)
             return Response({"error": e})
-        return Response({"video_id": video_id, "download_task_id": download_task_id})
+        request.save()
+        # download_task = services.download_video(request.video)
+        download_task: AsyncResult = download_video.delay(yt_video=request.video)
+        request.status = download_task.status
+        if request.status == "FAILURE":
+            return Response({"error": "Failed to download video"})
+        elif request.status == "SUCCESS":
+            services.send_successful_download_confirmation(request.video, chat_id, message_id)
+        return Response({"video_id": request.video.id, "download_task_id": download_task.id, "status": request.status})
 
 
 class CheckDownloadStatus(APIView):
@@ -82,7 +103,7 @@ class CheckDownloadStatus(APIView):
             if res.state == "FAILURE":
                 raise NotFound(res)
             if res.state == "SUCCESS":
-                return Response({"status": res.state, "id": res.id})
+                return Response({"status": res.state, "result": res.result})
             return Response({"status": res.state})
         raise NotFound(res)
 

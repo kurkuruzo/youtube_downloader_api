@@ -11,6 +11,7 @@ services:
     command: 'python manage.py runserver 0.0.0.0:8000'
     ports:
       - 8000:8000
+      - 3005:3005
     volumes:
       - ./src:/app
       - ./static/downloads:/app/static/downloads
@@ -18,6 +19,8 @@ services:
       - db
       - rabbit
       - celery
+    networks:
+      - yt
 
   celery:
     build:
@@ -33,6 +36,8 @@ services:
       - ./static/downloads:/app/static/downloads
     depends_on:
       - rabbit
+    networks:
+      - yt
 
   rabbit:
     image: rabbitmq:3-management
@@ -43,6 +48,8 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    networks:
+      - yt
 
   db:
     image: postgres
@@ -57,14 +64,19 @@ services:
     ports:
       - 5437:5437
     command: -p 5437
+    networks:
+      - yt
 
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   logging:
-  #     driver: none
-  #   ports:
-  #     - 8080:8080
+  adminer:
+    image: adminer
+    restart: always
+    logging:
+      driver: none
+    ports:
+      - 8090:8080
+    networks:
+      - yt
+    command: php -S 0.0.0.0:8080 -t /var/www/html
 
   telegram-bot-api:
     image: aiogram/telegram-bot-api:latest
@@ -75,3 +87,9 @@ services:
       - ../telegram-bot-api-data:/var/lib/telegram-bot-api
     ports:
       - "8081:8081"
+    networks:
+      - yt
+
+networks:
+  yt:
+    driver: bridge

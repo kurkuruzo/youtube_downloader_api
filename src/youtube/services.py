@@ -1,10 +1,14 @@
+import json
 import logging
 # import pytube
+from celery.result import AsyncResult
 from typing import Optional
 from django.utils import timezone
 from yt_dlp import YoutubeDL
 from .models import YouTubeVideo
+from .producer import send_download_confirmation
 from .tasks import download_video
+
 
 
 class YouTubeError(Exception):
@@ -18,28 +22,29 @@ def add_video(url: str, chat_id: Optional[int] = None, message_id: Optional[int]
     logger.info(f"STARTING ASYNC TASK FOR VIDEO {url}")
     video_in_db = _video_in_db(url)
     logger.info(f"{video_in_db=}")
-    # yt_downloader = _get_downloader(url=url)
+
     with YoutubeDL() as ydl:
         if video_in_db:
-            if not video_in_db.filesize_OK:
-                video = video_in_db
-            else:
-                return (video_in_db.id, "")
+            # if video_in_db.filesize_OK:
+            #     return video_in_db
+            video = video_in_db
         else:
             video = _create_video_obj(url=url, downloader=ydl)
-        download_status = _download_video(url=url, downloader=ydl, video=video, chat_id=chat_id, message_id=message_id)
-    return download_status
+    #         download_task_id = _download_video(video=video)
+    # return download_task_id
+    return video
 
-def _download_video(url: str, downloader: YoutubeDL, video: YouTubeVideo, chat_id: int, message_id: int):
-    download_task = download_video.delay(downloader, video, chat_id, message_id)
-    logger.info(f"{download_task=}")
-    return (video.id, download_task.id)
+
+# def download_video(video: YouTubeVideo):
+#     download_task: AsyncResult  = download_video.delay(video)
+#     logger.info(f"{download_task.id=}")
+#     return download_task
 
 def _create_video_obj(url: str, downloader: YoutubeDL) -> YouTubeVideo:
     try:
         info = downloader.extract_info(url, download=False)
         sanitized_info = downloader.sanitize_info(info)
-    except Exception as e:
+    except Exception:
         raise YouTubeError("Возникла ошибка при получении информации о видео. Объект для скачивания не создан.")
     if not sanitized_info:
         raise YouTubeError("Не удалось получить информацию о видео. Объект для скачивания не создан.")
@@ -83,3 +88,9 @@ def _video_in_db(url: str) -> Optional[YouTubeVideo]:
 #     logger.info(
 #         f"{stream.title} progress: {round((1 - (bytes_remaining / stream.filesize)) * 100, 0)}%"
 #     )
+
+def send_successful_download_confirmation(yt_video: YouTubeVideo, chat_id: int, message_id: int):
+    try:
+        send_download_confirmation(json.dumps({'yt_video_id': str(yt_video.id), "chat_id": chat_id, "message_id": message_id}))
+    except Exception:
+        logger.exception("Failed to send confirmation")

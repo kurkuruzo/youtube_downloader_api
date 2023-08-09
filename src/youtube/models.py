@@ -9,7 +9,7 @@ from api.settings import DOWNLOAD_PATH
 
 
 logger = logging.getLogger(__name__)
-# Create your models here.
+
 class YouTubeVideo(models.Model):
     name = models.CharField(max_length=500)
     description = models.TextField(max_length=3500, null=True, blank=True)
@@ -65,3 +65,24 @@ class YouTubeVideo(models.Model):
     def get_by_url(cls, url: str):
         logger.info(f"{url=}")
         return cls.objects.filter(url=url)
+
+
+class DownloadRequest(models.Model):
+    STATUS_CHOICES = (("pending", "pending"), ("done", "done"), ("failed", "failed"))
+    url = models.URLField()
+    video = models.ForeignKey(YouTubeVideo, on_delete=models.CASCADE, null=True, blank=True)
+    date_added = models.DateTimeField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="pending")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    class Meta:
+        ordering = ("-date_added",)
+        verbose_name = "Запрос на скачивание"
+        verbose_name_plural = "Запросы на скачивание"
+
+    def __str__(self):
+        return f"<DownloadRequest: {self.video.name}, {str(self.id)}>"
+
+class TelegramDownloadRequest(DownloadRequest):
+    chat_id = models.IntegerField()
+    message_id = models.IntegerField()
