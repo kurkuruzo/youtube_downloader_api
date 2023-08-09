@@ -1,9 +1,6 @@
-FROM python:3.9
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 ENV PYTHONUNBUFFERED 1
-WORKDIR /app
-COPY ./src/requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip && pip install -r requirements.txt
-# Fix for pytube
-#COPY ./src/cipher.py /usr/local/lib/python3.9/site-packages/pytube/
 
-COPY ./src/* /app/
+COPY ./src/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+COPY ./src /app/

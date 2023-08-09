@@ -6,50 +6,48 @@ services:
       dockerfile: Dockerfile
     restart: always
     user: '1000'
-    env_file:
-      - .env
-    command: 'python manage.py runserver 0.0.0.0:8000'
+#    env_file:
+#      - .env'
     ports:
-      - 8000:8000
-      - 3005:3005
+      - 8000:80
+#      - 3005:3005
     volumes:
       - ./src:/app
       - ./static/downloads:/app/static/downloads
     depends_on:
       - db
-      - rabbit
-      - celery
+#      - rabbit
     networks:
       - yt
 
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    env_file:
-      - .env
-    command: 'celery -A api worker -l INFO'
-    user: '1000'
-    volumes:
-      - ./src:/app
-      - ./static/downloads:/app/static/downloads
-    depends_on:
-      - rabbit
-    networks:
-      - yt
+#  celery:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    env_file:
+#      - .env
+#    command: 'celery -A api worker -l INFO'
+#    user: '1000'
+#    volumes:
+#      - ./src:/app
+#      - ./static/downloads:/app/static/downloads
+#    depends_on:
+#      - rabbit
+#    networks:
+#      - yt
 
-  rabbit:
-    image: rabbitmq:3-management
-    restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: rabbitMQ
-      RABBITMQ_DEFAULT_PASS: rabbitMQpass
-    ports:
-      - 5672:5672
-      - 15672:15672
-    networks:
-      - yt
+#  rabbit:
+#    image: rabbitmq:3-management
+#    restart: always
+#    environment:
+#      RABBITMQ_DEFAULT_USER: rabbitMQ
+#      RABBITMQ_DEFAULT_PASS: rabbitMQpass
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+#    networks:
+#      - yt
 
   db:
     image: postgres
@@ -67,28 +65,28 @@ services:
     networks:
       - yt
 
-  adminer:
-    image: adminer
-    restart: always
-    logging:
-      driver: none
-    ports:
-      - 8090:8080
-    networks:
-      - yt
-    command: php -S 0.0.0.0:8080 -t /var/www/html
+#  adminer:
+#    image: adminer
+#    restart: always
+#    logging:
+#      driver: none
+#    ports:
+#      - 8090:8080
+#    networks:
+#      - yt
+#    command: php -S 0.0.0.0:8080 -t /var/www/html
 
-  telegram-bot-api:
-    image: aiogram/telegram-bot-api:latest
-    environment:
-      TELEGRAM_API_ID: "${API_ID}"
-      TELEGRAM_API_HASH: "${API_HASH}"
-    volumes:
-      - ../telegram-bot-api-data:/var/lib/telegram-bot-api
-    ports:
-      - "8081:8081"
-    networks:
-      - yt
+#  telegram-bot-api:
+#    image: aiogram/telegram-bot-api:latest
+#    environment:
+#      TELEGRAM_API_ID: "${API_ID}"
+#      TELEGRAM_API_HASH: "${API_HASH}"
+#    volumes:
+#      - ../telegram-bot-api-data:/var/lib/telegram-bot-api
+#    ports:
+#      - "8081:8081"
+#    networks:
+#      - yt
 
 networks:
   yt:
