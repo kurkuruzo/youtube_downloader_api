@@ -4,4 +4,8 @@ src/youtube/static/downloads/
 src/youtube/migrations/__pycache__/
 .env
 
+django_services.log
 src/django_services.log
+src_django/
+venv/
+venv_fastapi/

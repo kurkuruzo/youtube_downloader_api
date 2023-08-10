@@ -1,13 +1,11 @@
 import json
 import logging
-# import pytube
-from celery.result import AsyncResult
 from typing import Optional
 from django.utils import timezone
+# from pathlib import Path
 from yt_dlp import YoutubeDL
 from .models import YouTubeVideo
 from .producer import send_download_confirmation
-from .tasks import download_video
 
 
 
@@ -23,15 +21,17 @@ def add_video(url: str, chat_id: Optional[int] = None, message_id: Optional[int]
     video_in_db = _video_in_db(url)
     logger.info(f"{video_in_db=}")
 
+    # download_abs_path = Path(f"{DOWNLOAD_PATH}").absolute()
+    # logger.info(f"{download_abs_path=}")
     with YoutubeDL() as ydl:
         if video_in_db:
             # if video_in_db.filesize_OK:
             #     return video_in_db
             video = video_in_db
         else:
-            video = _create_video_obj(url=url, downloader=ydl)
-    #         download_task_id = _download_video(video=video)
-    # return download_task_id
+            video_info = get_video_info(url, downloader=ydl)
+            video = _create_video_obj(video_info=video_info)
+
     return video
 
 
@@ -40,7 +40,21 @@ def add_video(url: str, chat_id: Optional[int] = None, message_id: Optional[int]
 #     logger.info(f"{download_task.id=}")
 #     return download_task
 
-def _create_video_obj(url: str, downloader: YoutubeDL) -> YouTubeVideo:
+def _create_video_obj(video_info: dict) -> YouTubeVideo:
+    video_obj = YouTubeVideo.objects.create(
+        name=video_info.get("title"),
+        description=video_info.get("description"),
+        url=video_info.get("original_url"),
+        length=video_info.get("duration"),
+        filesize=video_info.get("filesize_approx"),
+        date_added=timezone.now(),
+        thumbnail=video_info.get("thumbnail"),
+        path=video_info.get("path"),
+    )
+    logger.info(f"{video_obj.__dict__=}")
+    return video_obj
+
+def get_video_info(url: str, downloader: YoutubeDL) -> dict:
     try:
         info = downloader.extract_info(url, download=False)
         sanitized_info = downloader.sanitize_info(info)
@@ -48,18 +62,8 @@ def _create_video_obj(url: str, downloader: YoutubeDL) -> YouTubeVideo:
         raise YouTubeError("Возникла ошибка при получении информации о видео. Объект для скачивания не создан.")
     if not sanitized_info:
         raise YouTubeError("Не удалось получить информацию о видео. Объект для скачивания не создан.")
-    video_obj = YouTubeVideo.objects.create(
-        name=sanitized_info.get("title"),
-        description=sanitized_info.get("description"),
-        url=url,
-        length=sanitized_info.get("duration"),
-        date_added=timezone.now(),
-        thumbnail=sanitized_info.get("thumbnail"),
-        path=downloader.prepare_filename(sanitized_info)
-    )
-    logger.info(f"{video_obj.__dict__=}")
-    return video_obj
-
+    sanitized_info["path"] = downloader.prepare_filename(sanitized_info)
+    return sanitized_info
 
 def _video_in_db(url: str) -> Optional[YouTubeVideo]:
     logger.info(

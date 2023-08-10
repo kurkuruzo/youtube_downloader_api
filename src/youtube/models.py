@@ -68,11 +68,16 @@ class YouTubeVideo(models.Model):
 
 
 class DownloadRequest(models.Model):
-    STATUS_CHOICES = (("pending", "pending"), ("done", "done"), ("failed", "failed"))
+    STATUS_CHOICES = (
+        ("PENDING", "PENDING"),
+        ("SUCCESS", "SUCCESS"),
+        ("FAILURE", "FAILURE"),
+        ("COMPLETE", "COMPLETE"),
+        )
     url = models.URLField()
     video = models.ForeignKey(YouTubeVideo, on_delete=models.CASCADE, null=True, blank=True)
     date_added = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="PENDING")
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     class Meta:

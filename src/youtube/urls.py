@@ -10,6 +10,9 @@ urlpatterns = [
     path("videos/confirmation", views.confirmation, name="confirmation"),
     path("videos/<str:pk>", views.VideoDetails.as_view(), name="video-details"),
     path("api/videos", views.AddVideo.as_view(), name="add-video"),
-    path("api/videos/status", views.CheckDownloadStatus.as_view(), name="check-download-status"),
+    path("api/videos/downloaded", views.DownloadedVideosView.as_view(), name="get-downloaded-videos"),
+    path("api/videos/<str:pk>/status", views.CheckDownloadStatus.as_view(), name="check-download-status"),
+    path("api/videos/<str:pk>/set_complete", views.SetVideoDownoaded.as_view(), name="set-video-complete"),
     path("api/videos/<str:pk>", views.GetVideo.as_view(), name="get-video"),
+
 ]

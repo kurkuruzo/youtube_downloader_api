@@ -146,4 +146,4 @@ CORS_ALLOW_ALL_ORIGINS = True
 CELERY_ACCEPT_CONTENT = ["json", "pickle"]
 
 # Download path
-DOWNLOAD_PATH = os.environ.get("DOWNLOAD_PATH") or "youtube/static/downloads/"
+DOWNLOAD_PATH = os.environ.get("DOWNLOAD_PATH") or "static/downloads/"

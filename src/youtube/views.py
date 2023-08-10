@@ -83,34 +83,49 @@ class AddVideo(APIView):
             return Response({"error": e})
         request.save()
         # download_task = services.download_video(request.video)
-        download_task: AsyncResult = download_video.delay(yt_video=request.video)
+        if request.video.filesize_OK:
+            return Response({"request_id": request.id, "video_id": request.video.id, "status": "FINISHED"})
+        download_task: AsyncResult = download_video.delay(download_request=request)
         request.status = download_task.status
         if request.status == "FAILURE":
             return Response({"error": "Failed to download video"})
         elif request.status == "SUCCESS":
             services.send_successful_download_confirmation(request.video, chat_id, message_id)
-        return Response({"video_id": request.video.id, "download_task_id": download_task.id, "status": request.status})
+        return Response({"request_id": request.id, "video_id": request.video.id, "download_task_id": download_task.id, "status": request.status})
+
+class DownloadedVideosView(generics.ListAPIView):
+    queryset = DownloadRequest.objects.filter(status="SUCCESS")
+    serializer_class = serializers.DownloadRequestSerializer
 
 
-class CheckDownloadStatus(APIView):
-    def get(self, request):
-        task_id = request.GET.get("task_id")
+class CheckDownloadStatus(generics.RetrieveAPIView):
+    serializer_class = serializers.DownloadTaskserializer
+
+    def get_object(self):
+        task_id = self.kwargs.get("pk")
         logger.info(f"{task_id=}")
         if task_id:
             res = AsyncResult(task_id)
             logger.info(f"{res.__dict__=}")
             logger.info({"status": res.state})
-            if res.state == "FAILURE":
-                raise NotFound(res)
-            if res.state == "SUCCESS":
-                return Response({"status": res.state, "result": res.result})
-            return Response({"status": res.state})
-        raise NotFound(res)
+            logger.info({"status": res.result})
+            return res
 
 
 class GetVideo(generics.RetrieveAPIView):
     queryset = YouTubeVideo.objects.all()
     serializer_class = serializers.YouTubeVideoSerializer
+
+
+class SetVideoDownoaded(generics.UpdateAPIView):
+    queryset = DownloadRequest.objects.all()
+    serializer_class = serializers.DownloadRequestSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.status = "COMPLETE"
+        instance.save()
+        return Response(self.get_serializer(instance).data.get("id"))
 
 
 class GetVideoByUrl(generics.RetrieveAPIView):
